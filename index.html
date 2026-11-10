@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#101a27">
+<title>Sunline Relay — Canyon Overdrive</title>
+<style>
+:root{color-scheme:dark;--cream:#fff2d6;--orange:#ff9d42;--cyan:#5be3ed;--ink:#111923}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101a27;font-family:Inter,ui-rounded,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--cream);touch-action:none}canvas{display:block;width:100%;height:100%;touch-action:none}
+#hud{position:absolute;inset:0;pointer-events:none;padding:clamp(14px,3vw,30px);display:flex;flex-direction:column;justify-content:space-between;text-shadow:0 2px 12px #101923}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.brand{font-size:11px;letter-spacing:.23em;text-transform:uppercase;color:#b9c5c6;font-weight:800}.brand b{display:block;color:var(--cream);font-size:clamp(16px,2.4vw,23px);letter-spacing:.06em;margin-top:3px}.stats{display:flex;gap:clamp(8px,2vw,24px);text-align:right}.stat{min-width:55px}.stat label{display:block;font-size:9px;letter-spacing:.18em;color:#b7c8c8;font-weight:800}.stat strong{font-variant-numeric:tabular-nums;font-size:clamp(17px,2.8vw,25px)}#distance{color:var(--orange)}.bottom{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:14px}.objective{font-size:11px;color:#d9e3dc;line-height:1.55}.objective b{color:#fff2d6}.charge-wrap{width:min(190px,32vw);}.charge-label{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.16em;font-weight:800;margin-bottom:6px;color:#c5d6d4}.chargebar{height:8px;border:1px solid #ffffff55;border-radius:20px;background:#0d1925aa;overflow:hidden}.chargebar i{display:block;width:100%;height:100%;background:linear-gradient(90deg,#4dc9e9,#98f3ee);transition:width .12s}.hint{text-align:right;font-size:10px;color:#d9e3dc;line-height:1.5}.hint strong{color:#fff2d6}.mobile-controls{position:absolute;inset:auto 0 0;display:none;justify-content:space-between;padding:18px 22px max(18px,env(safe-area-inset-bottom));pointer-events:none}.pad{display:flex;gap:12px}.touch{pointer-events:auto;border:1px solid #ffffff50;background:#102131a8;color:#fff4dc;border-radius:18px;width:62px;height:58px;font-size:24px;font-weight:900;backdrop-filter:blur(8px);box-shadow:0 7px 25px #06111b66}.touch:active,.touch.down{background:#ff9d4280;border-color:#ffc77e}.touch.phase{width:72px;font-size:11px;letter-spacing:.08em;border-color:#74e9ee88}.touch.phase.down{background:#46d7e777}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;padding:20px;background:linear-gradient(180deg,#0b152633,#0b1526b8);transition:opacity .2s}.overlay.hidden{opacity:0;pointer-events:none}.card{width:min(530px,100%);padding:clamp(25px,6vw,48px);border:1px solid #ffffff29;border-radius:24px;background:linear-gradient(145deg,#172b3beF,#101b29f2);box-shadow:0 24px 90px #030912a6;position:relative;overflow:hidden}.card:before{content:"";position:absolute;width:250px;height:250px;border-radius:50%;right:-105px;top:-125px;background:#ff994220;filter:blur(2px)}.eyebrow{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#f6a750;font-weight:900}.card h1{font-size:clamp(36px,8vw,61px);line-height:.96;letter-spacing:-.055em;margin:14px 0 12px;color:#fff4dd}.card p{font-size:14px;line-height:1.65;color:#c0d0cf;max-width:390px;margin:0 0 22px}.mechanic{border-left:2px solid #58dbe3;padding:4px 0 4px 12px;margin:19px 0;color:#a9c5c7;font-size:12px;line-height:1.6}.mechanic strong{color:#e9ffff}.cta{border:0;border-radius:12px;padding:14px 21px;background:linear-gradient(135deg,#ffb35a,#f27638);color:#18202a;font-size:12px;font-weight:1000;letter-spacing:.12em;text-transform:uppercase;box-shadow:0 8px 26px #f27b3838;cursor:pointer}.cta:hover{filter:brightness(1.09);transform:translateY(-1px)}.fine{font-size:10px;color:#8da2a5;margin-left:12px}.result{font-size:13px;color:#d9e3dc;margin:10px 0 23px}.pauseMark{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:10px;letter-spacing:.23em;text-align:center;color:#fff4dd;text-shadow:0 2px 20px #000;pointer-events:none}
+@media (pointer:coarse),(max-width:700px){.mobile-controls{display:flex}.bottom{padding-bottom:77px}.hint{display:none}.objective{font-size:10px}.charge-wrap{width:min(150px,34vw)}}
+@media (max-height:500px){#hud{padding:10px 18px}.bottom{padding-bottom:0}.card{padding:22px 28px}.card h1{font-size:40px;margin:8px 0}.card p{margin-bottom:10px}.mechanic{margin:9px 0}}
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="Sunline Relay canyon racing game"></canvas>
+<div id="hud">
+  <div class="top">
+    <div class="brand">Canyon Overdrive <b>SUNLINE RELAY</b></div>
+    <div class="stats">
+      <div class="stat"><label>RUN</label><strong id="distance">0000</strong></div>
+      <div class="stat"><label>SHARDS</label><strong id="shards">0 / 8</strong></div>
+      <div class="stat"><label>HULL</label><strong id="hull">◆ ◆ ◆</strong></div>
+    </div>
+  </div>
+  <div class="bottom">
+    <div class="objective"><b>RELAY OBJECTIVE</b><br>Reach the beacon with 8 sun shards.</div>
+    <div class="charge-wrap"><div class="charge-label"><span>RIFT SHIFT</span><span id="chargeText">READY</span></div><div class="chargebar"><i id="chargeBar"></i></div></div>
+    <div class="hint"><strong>← →</strong> steer &nbsp; <strong>SPACE</strong> phase<br><strong>P</strong> pause &nbsp; <strong>R</strong> restart</div>
+  </div>
+</div>
+<div id="pauseMark" class="pauseMark" hidden>PAUSED<br><span style="font-size:9px;opacity:.7">PRESS P TO RESUME</span></div>
+<div class="mobile-controls" aria-label="Touch controls">
+  <div class="pad"><button class="touch" data-control="left" aria-label="Steer left">←</button><button class="touch" data-control="right" aria-label="Steer right">→</button></div>
+  <button class="touch phase" data-control="phase" aria-label="Rift Shift">RIFT<br>SHIFT</button>
+</div>
+<div class="overlay" id="overlay">
+  <section class="card">
+    <div class="eyebrow">A new route through the badlands</div>
+    <h1 id="title">SUNLINE<br>RELAY</h1>
+    <p id="description">The canyon's old signal towers are waking up. Run the Sunken Echo, thread its hazard fields, and bring eight solar shards to the beacon.</p>
+    <div class="mechanic"><strong>NEW MECHANIC · RIFT SHIFT</strong><br>Tap <b>SPACE</b> to phase out of reality for a moment. Ghost through violet barriers and snatch spectral shards. Solar shards refill your shift.</div>
+    <div class="result" id="result" hidden></div>
+    <button class="cta" id="startButton">Start the relay</button><span class="fine">← → / A D to steer · P to pause</span>
+  </section>
+</div>
+<script>
+(()=>{
+'use strict';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const ui={overlay:document.getElementById('overlay'),title:document.getElementById('title'),description:document.getElementById('description'),result:document.getElementById('result'),start:document.getElementById('startButton'),distance:document.getElementById('distance'),shards:document.getElementById('shards'),hull:document.getElementById('hull'),bar:document.getElementById('chargeBar'),charge:document.getElementById('chargeText'),pause:document.getElementById('pauseMark')};
+let W=0,H=0,DPR=1,now=0,last=0,mode='menu',keys={},touches={left:false,right:false,phase:false};
+const FINISH=1900, VIEW=390, LANES=[-.68,0,.68];
+let game;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=Math.floor(W*DPR);canvas.height=Math.floor(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0)}
+addEventListener('resize',resize);resize();
+function reset(){game={distance:0,x:0,speed:82,hull:3,shards:0,charge:100,phase:0,invuln:0,shake:0,objects:[],lastSpawn:0,flash:0,score:0};populate()}
+function rand(seed){let x=Math.sin(seed*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+function populate(){let n=0;for(let z=70;z<FINISH+300;z+=26){n++;let r=rand(n*7.31),lane=LANES[Math.floor(rand(n*3.7)*3)];if(z%156<26){game.objects.push({z,x:lane,type:'shard',spectral:rand(n+41)>.45,done:false})}
+else if(r<.42){game.objects.push({z,x:lane,type:rand(n+9)>.52?'rock':'rift',done:false})}
+else if(r<.72){game.objects.push({z,x:lane,type:'shard',spectral:rand(n+17)>.56,done:false});if(rand(n+23)>.42)game.objects.push({z:z+9,x:lane*.15,type:'shard',spectral:false,done:false})}
+else if(r<.88){game.objects.push({z,x:lane,type:'boost',done:false})}
+else {game.objects.push({z,x:lane,type:'shard',spectral:true,done:false});game.objects.push({z:z+18,x:LANES[(Math.floor(rand(n+6)*3))],type:'rock',done:false})}}
+// Guaranteed reward cadence so the objective stays fair.
+for(let z=130;z<FINISH;z+=190)game.objects.push({z,x:LANES[Math.floor(rand(z)*3)],type:'shard',spectral:false,done:false});
+game.objects.push({z:FINISH,x:0,type:'beacon',done:false});game.objects.sort((a,b)=>a.z-b.z)}
+function start(){reset();mode='play';ui.overlay.classList.add('hidden');ui.pause.hidden=true;last=performance.now()}
+ui.start.addEventListener('click',start);
+function stop(win){mode=win?'win':'over';ui.title.innerHTML=win?'RELAY<br>COMPLETE':'RUN<br>ENDED';ui.description.textContent=win?'The Sunline is lit. The canyon has a signal again — and a new legend on the road.':(game.hull<=0?'Your ride ran out of hull before the beacon.':'The beacon is still out there. Tune your line and try again.');ui.result.hidden=false;ui.result.innerHTML=`${Math.floor(game.distance)} m · ${game.shards} / 8 shards · ${Math.max(0,game.hull)} hull`;ui.start.textContent='Run it again';ui.overlay.classList.remove('hidden')}
+function setPause(){if(mode==='play'){mode='paused';ui.pause.hidden=false}else if(mode==='paused'){mode='play';ui.pause.hidden=true;last=performance.now()}}
+function activatePhase(){if(game&&mode==='play'&&game.phase<=0&&game.charge>=34){game.charge-=34;game.phase=1.15;game.flash=.28}}
+function keydown(e){const k=e.key.toLowerCase();if([' ','arrowleft','arrowright','arrowup','arrowdown'].includes(k))e.preventDefault();keys[k]=true;if(k===' '&&!e.repeat)activatePhase();if(k==='p'||k==='escape')setPause();if(k==='r'&&mode!=='menu')start();if((k==='enter')&&(mode==='menu'||mode==='win'||mode==='over'))start()}
+function keyup(e){keys[e.key.toLowerCase()]=false}
+addEventListener('keydown',keydown);addEventListener('keyup',keyup);addEventListener('blur',()=>{keys={};if(mode==='play')setPause()});
+for(const b of document.querySelectorAll('.touch')){const name=b.dataset.control;const down=e=>{e.preventDefault();touches[name]=true;b.classList.add('down');if(name==='phase')activatePhase()};const up=e=>{e.preventDefault();touches[name]=false;b.classList.remove('down')};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',up)}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function curve(z){return Math.sin(z*.0047)*.30+Math.sin(z*.0019+1.3)*.28}
+function project(z){const horizon=H*.34,depth=clamp(1-z/VIEW,0,1),p=depth*depth;return {y:horizon+p*(H-horizon),p}}
+function roadCenter(z){return W*.5+(curve(game.distance+z)-curve(game.distance))*W*.63}
+function drawBackground(){let sky=ctx.createLinearGradient(0,0,0,H*.68);sky.addColorStop(0,'#83bdc3');sky.addColorStop(.52,'#f1ae72');sky.addColorStop(1,'#e88453');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+// sun disk and atmospheric bands
+ctx.fillStyle='#ffe2a1';ctx.beginPath();ctx.arc(W*.76,H*.235,Math.min(W,H)*.062,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f7a16d44';ctx.fillRect(0,H*.29,W,H*.08);
+// distant mesas
+ctx.fillStyle='#ac6b65';ctx.beginPath();ctx.moveTo(0,H*.40);for(let x=0;x<=W+40;x+=40){const y=H*(.31+Math.sin(x*.006+1)*.025+Math.sin(x*.013)*.018);ctx.lineTo(x,y)}ctx.lineTo(W,H*.53);ctx.lineTo(0,H*.53);ctx.closePath();ctx.fill();
+ctx.fillStyle='#8c5559';ctx.beginPath();ctx.moveTo(0,H*.47);for(let x=0;x<=W+35;x+=35){let y=H*(.36+Math.sin(x*.004+.6)*.045+Math.sin(x*.01+1)*.02);ctx.lineTo(x,y)}ctx.lineTo(W,H*.58);ctx.lineTo(0,H*.58);ctx.closePath();ctx.fill();
+// near canyon walls
+const wall=ctx.createLinearGradient(0,H*.4,0,H);wall.addColorStop(0,'#b66b55');wall.addColorStop(1,'#543b3d');ctx.fillStyle=wall;
+ctx.beginPath();ctx.moveTo(0,H*.40);ctx.lineTo(W*.10,H*.35);ctx.lineTo(W*.19,H*.43);ctx.lineTo(W*.28,H*.39);ctx.lineTo(W*.32,H*.52);ctx.lineTo(W*.30,H);ctx.lineTo(0,H);ctx.fill();
+ctx.beginPath();ctx.moveTo(W,H*.40);ctx.lineTo(W*.9,H*.34);ctx.lineTo(W*.81,H*.42);ctx.lineTo(W*.71,H*.37);ctx.lineTo(W*.68,H*.53);ctx.lineTo(W*.70,H);ctx.lineTo(W,H);ctx.fill();
+// strata strokes
+ctx.strokeStyle='#f1a06b44';ctx.lineWidth=2;for(let i=0;i<8;i++){let yy=H*(.49+i*.075);ctx.beginPath();ctx.moveTo(0,yy+Math.sin(i)*10);ctx.lineTo(W*.29,yy+Math.sin(i+3)*17);ctx.stroke();ctx.beginPath();ctx.moveTo(W,yy+Math.sin(i+1)*9);ctx.lineTo(W*.71,yy+Math.sin(i+5)*17);ctx.stroke()}}
+function drawRoad(){const slices=90;for(let i=slices;i>0;i--){let z=VIEW*i/slices,z2=VIEW*(i-1)/slices,p1=project(z),p2=project(z2),c1=roadCenter(z),c2=roadCenter(z2),half1=(W*.42)*(.28+p1.p*.72),half2=(W*.42)*(.28+p2.p*.72);let stripe=Math.floor((game.distance+z)/18)%2;ctx.fillStyle=stripe?'#7b4842':'#825047';ctx.beginPath();ctx.moveTo(c1-half1*1.35,p1.y);ctx.lineTo(c1+half1*1.35,p1.y);ctx.lineTo(c2+half2*1.35,p2.y);ctx.lineTo(c2-half2*1.35,p2.y);ctx.fill();ctx.fillStyle=stripe?'#303a3e':'#343b3e';ctx.beginPath();ctx.moveTo(c1-half1,p1.y);ctx.lineTo(c1+half1,p1.y);ctx.lineTo(c2+half2,p2.y);ctx.lineTo(c2-half2,p2.y);ctx.fill();
+// road edge
+ctx.strokeStyle='#ffd38b';ctx.globalAlpha=.55;ctx.lineWidth=Math.max(1,p2.p*3);ctx.beginPath();ctx.moveTo(c1-half1,p1.y);ctx.lineTo(c2-half2,p2.y);ctx.moveTo(c1+half1,p1.y);ctx.lineTo(c2+half2,p2.y);ctx.stroke();ctx.globalAlpha=1;
+// broken center lane lines
+if(Math.floor((game.distance+z)/22)%2===0){ctx.strokeStyle='#e7c68b';ctx.globalAlpha=.55;ctx.lineWidth=Math.max(1,p2.p*2);for(let lane=-1;lane<=1;lane+=2){ctx.beginPath();ctx.moveTo(c1+lane*half1*.34,p1.y);ctx.lineTo(c2+lane*half2*.34,p2.y);ctx.stroke()}ctx.globalAlpha=1}}}
+function screenObject(o){const pr=project(o.z-game.distance),center=roadCenter(o.z-game.distance),half=(W*.42)*(.28+pr.p*.72);return {x:center+o.x*half,y:pr.y,p:pr.p,scale:Math.max(.05,pr.p)}}
+function drawObject(o){const q=screenObject(o);if(q.p<=0)return;const s=q.scale;ctx.save();ctx.translate(q.x,q.y);ctx.scale(s,s);
+if(o.type==='shard'){const spectral=o.spectral;ctx.shadowBlur=22;ctx.shadowColor=spectral?'#8a85ff':'#ffe995';ctx.fillStyle=spectral?'#aaa4ff':'#ffe9a0';ctx.beginPath();ctx.moveTo(0,-29);ctx.lineTo(14,-4);ctx.lineTo(0,20);ctx.lineTo(-14,-4);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#fff9db';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-3,-8,3,0,7);ctx.fill()}
+else if(o.type==='rock'){ctx.fillStyle='#402f35';ctx.beginPath();ctx.moveTo(-26,12);ctx.lineTo(-19,-18);ctx.lineTo(-3,-29);ctx.lineTo(20,-19);ctx.lineTo(27,12);ctx.closePath();ctx.fill();ctx.fillStyle='#a65f4d';ctx.beginPath();ctx.moveTo(-19,-18);ctx.lineTo(-3,-29);ctx.lineTo(4,-9);ctx.lineTo(-8,1);ctx.closePath();ctx.fill()}
+else if(o.type==='rift'){ctx.shadowBlur=18;ctx.shadowColor='#9b65ff';ctx.strokeStyle='#c9a8ff';ctx.lineWidth=6;ctx.beginPath();ctx.ellipse(0,-5,25,34,0,Math.PI,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#58378c';ctx.fillRect(-28,0,8,17);ctx.fillRect(20,0,8,17);ctx.strokeStyle='#a88af5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-22,2);ctx.lineTo(-22,14);ctx.moveTo(22,2);ctx.lineTo(22,14);ctx.stroke()}
+else if(o.type==='boost'){ctx.fillStyle='#51dbe4';ctx.shadowBlur=18;ctx.shadowColor='#4fdde8';ctx.beginPath();ctx.moveTo(-22,8);ctx.lineTo(-12,-17);ctx.lineTo(0,8);ctx.lineTo(12,-17);ctx.lineTo(23,8);ctx.closePath();ctx.fill();ctx.shadowBlur=0}
+else if(o.type==='beacon'){ctx.fillStyle='#ffe69e';ctx.shadowBlur=32;ctx.shadowColor='#ffe69e';ctx.fillRect(-5,-130,10,140);ctx.beginPath();ctx.arc(0,-132,20,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.fillText('BEACON',0,-159)}
+ctx.restore()}
+function drawCar(){const x=W*.5+game.x*W*.24,y=H*.83;ctx.save();ctx.translate(x,y);if(game.shake>0){ctx.translate((Math.random()-.5)*8,(Math.random()-.5)*5)}
+if(game.phase>0){ctx.globalAlpha=.42+Math.sin(now*.04)*.15;ctx.shadowBlur=30;ctx.shadowColor='#7eeaff'}
+// wheels
+ctx.fillStyle='#101820';rounded(-38,10,18,42,6);rounded(20,10,18,42,6);ctx.fillStyle='#899294';rounded(-35,20,5,21,2);rounded(30,20,5,21,2);
+// body
+ctx.fillStyle=game.phase>0?'#75e4ef':'#e5743f';ctx.beginPath();ctx.moveTo(-31,40);ctx.lineTo(-34,3);ctx.lineTo(-23,-24);ctx.lineTo(-13,-39);ctx.lineTo(13,-39);ctx.lineTo(23,-24);ctx.lineTo(34,3);ctx.lineTo(31,40);ctx.closePath();ctx.fill();ctx.fillStyle='#f8b461';ctx.beginPath();ctx.moveTo(-22,-17);ctx.lineTo(-12,-34);ctx.lineTo(12,-34);ctx.lineTo(22,-17);ctx.closePath();ctx.fill();ctx.fillStyle='#253d4a';ctx.beginPath();ctx.moveTo(-20,-14);ctx.lineTo(-11,-30);ctx.lineTo(11,-30);ctx.lineTo(20,-14);ctx.closePath();ctx.fill();ctx.fillStyle='#fff1bd';ctx.fillRect(-25,22,10,6);ctx.fillRect(15,22,10,6);ctx.fillStyle='#4b2929';ctx.fillRect(-7,1,14,24);
+if(game.phase>0){ctx.strokeStyle='#aaf7ff';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,3,46,57,0,0,Math.PI*2);ctx.stroke()}
+ctx.restore()}
+function rounded(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+function drawParticles(){if(game.flash>0){ctx.fillStyle=`rgba(103,232,255,${game.flash*.22})`;ctx.fillRect(0,0,W,H)}}
+function update(dt){if(mode!=='play')return;let steering=(keys.arrowleft||keys.a||touches.left?-1:0)+(keys.arrowright||keys.d||touches.right?1:0);game.x=clamp(game.x+steering*dt*(1.7+game.speed*.003),-1.05,1.05);
+let target=90+(keys.arrowup||keys.w?22:0)-(keys.arrowdown||keys.s?30:0);game.speed+=(target-game.speed)*dt*.6;game.distance+=game.speed*dt;game.phase=Math.max(0,game.phase-dt);game.invuln=Math.max(0,game.invuln-dt);game.shake=Math.max(0,game.shake-dt);game.flash=Math.max(0,game.flash-dt);game.score+=dt;
+for(const o of game.objects){if(o.done)continue;const dz=o.z-game.distance;if(dz>13||dz<-8)continue;if(Math.abs(o.x-game.x)>.23)continue;
+if(o.type==='rock'){if(game.phase<=0&&game.invuln<=0){game.hull--;game.speed=Math.max(48,game.speed-24);game.invuln=1.1;game.shake=.35;game.flash=.15;o.done=true;if(game.hull<=0){stop(false);return}}}
+else if(o.type==='rift'){if(game.phase<=0&&game.invuln<=0){game.hull--;game.speed=Math.max(48,game.speed-18);game.invuln=1;game.shake=.3;o.done=true;if(game.hull<=0){stop(false);return}}}
+else if(o.type==='shard'){if(!o.spectral||game.phase>0){o.done=true;game.shards++;game.charge=clamp(game.charge+(o.spectral?13:19),0,100);game.speed=Math.min(118,game.speed+3)}}
+else if(o.type==='boost'){o.done=true;game.speed=118;game.charge=clamp(game.charge+7,0,100)}
+else if(o.type==='beacon'){if(game.shards>=8)stop(true);else{game.hull--;game.invuln=1.5;game.shake=.5;o.done=true;if(game.hull<=0)stop(false)}}}
+if(game.distance>=FINISH){if(game.shards>=8)stop(true);else stop(false)}
+ui.distance.textContent=String(Math.floor(game.distance)).padStart(4,'0');ui.shards.textContent=`${game.shards} / 8`;ui.hull.textContent=game.hull>0?'◆ '.repeat(game.hull).trim():'—';ui.bar.style.width=`${game.charge}%`;ui.charge.textContent=game.phase>0?'ACTIVE':game.charge<34?'RECHARGE':'READY';if(game.phase<=0&&game.charge<34)game.charge=Math.min(34,game.charge+dt*1.1)}
+function draw(){ctx.save();if(game&&game.shake>0){ctx.translate((Math.random()-.5)*game.shake*12,0)}drawBackground();if(game){drawRoad();for(const o of game.objects){if(!o.done&&o.z-game.distance<VIEW&&o.z-game.distance>-8)drawObject(o)}drawCar();drawParticles();}else{drawRoad();drawCar()}ctx.restore();}
+function frame(t){now=t;const dt=Math.min(.04,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(frame)}
+reset();mode='menu';requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
